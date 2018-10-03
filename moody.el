@@ -304,6 +304,7 @@ to the command loop."
 (advice-add 'select-window :after           'moody--set-active-window)
 (advice-add 'select-frame :after            'moody--set-active-window)
 (advice-add 'delete-frame :after            'moody--set-active-window)
+(advice-add 'handle-switch-frame :after     'moody--set-active-window)
 
 ;;; Kludges
 
