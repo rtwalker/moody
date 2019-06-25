@@ -233,6 +233,59 @@ not specified, then faces based on `default', `mode-line' and
                           (`(ribbon down) (cons 'down (reverse slant)))
                           (`(ribbon up)   (cons 'up   (reverse slant)))))))))
 
+(defun moody-wrap-bookend-with-bg-color (string &optional width direction type face-active face-inactive bg-color end)
+  (unless type
+    (setq type 'tab))
+  (unless direction
+    (setq direction 'down))
+  (unless end
+    (setq end 'left))
+  (let* ((base  (if (moody-window-active-p)
+                    (or face-active 'mode-line)
+                  (or face-inactive 'mode-line-inactive)))
+         (outer (face-attribute base :background))
+         (line  (face-attribute base :underline))
+         (line  (if (listp line) (plist-get line :color) line))
+         (line  (if (eq line 'unspecified) outer line))
+         (inner (if (eq type 'ribbon)
+                    (face-attribute base :underline)
+                  bg-color))
+         (slant (if (eq direction 'down)
+                    (list outer line inner)
+                  (list inner line outer)))
+         (face  (if (eq direction 'down)
+                    (list :overline (and (eq type 'ribbon) line)
+                          :underline line
+                          :background bg-color)
+                  (list :overline line
+                        :underline (and (or (eq type 'ribbon)
+                                            (not (window-at-side-p nil 'bottom)))
+                                        line)
+                        :background bg-color)))
+         (pad   (max (- (or width 0) (length string)) 2)))
+    (setq string
+          (concat (make-string (ceiling pad 2) ?\s)
+                  (substring string 0)
+                  (make-string (floor pad 2) ?\s)))
+    (add-face-text-property 0 (length string) face nil string)
+    (list
+     (if (eq end 'left)
+         (propertize " " 'face face)
+       (propertize " " 'face face 'display
+                   (apply moody-slant-function
+                          (if (eq direction 'down) 'down 'up)
+                          slant)))
+     string
+     (if (eq end 'left)
+     (propertize " " 'face face 'display
+                 (apply moody-slant-function
+                        (pcase (list type direction)
+                          (`(tab    down) (cons 'up   slant))
+                          (`(tab    up)   (cons 'down slant))
+                          (`(ribbon down) (cons 'down (reverse slant)))
+                          (`(ribbon up)   (cons 'up   (reverse slant))))))
+     (propertize " " 'face face 'display)))))
+
 (defvar moody--cache nil)
 
 (defun moody-slant (direction c1 c2 c3 &optional height)
