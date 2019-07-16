@@ -284,7 +284,7 @@ not specified, then faces based on `default', `mode-line' and
                           (`(tab    up)   (cons 'down slant))
                           (`(ribbon down) (cons 'down (reverse slant)))
                           (`(ribbon up)   (cons 'up   (reverse slant))))))
-     (propertize " " 'face face 'display)))))
+     (propertize " " 'face face)))))
 
 (defvar moody--cache nil)
 
